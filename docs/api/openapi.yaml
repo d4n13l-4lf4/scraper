@@ -1,0 +1,166 @@
+openapi: 3.1.0
+x-canonical-path: docs/api/openapi.yaml
+info:
+  title: Hacker News Crawler API
+  version: 1.0.0
+  description: HTTP contract for requesting Hacker News story filters.
+servers:
+  - url: /
+paths:
+  /entries:
+    get:
+      operationId: getEntries
+      summary: Retrieve stories matching a filter
+      parameters:
+        - name: filter
+          in: query
+          required: true
+          description: The canonical filter to apply.
+          schema:
+            type: string
+            enum:
+              - more-than-five-words
+              - five-or-fewer-words
+      responses:
+        '200':
+          description: Filtered stories and processing statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilterResponse'
+        '400':
+          description: The filter parameter is missing or unsupported.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidFilter:
+                  value:
+                    code: invalid_filter
+                    message: The requested filter is not supported.
+        '500':
+          description: An unexpected processing error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internalError:
+                  value:
+                    code: internal_error
+                    message: The request could not be completed.
+        '502':
+          description: The upstream service failed or returned an unusable page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                upstreamUnavailable:
+                  value:
+                    code: upstream_unavailable
+                    message: The upstream service could not be reached.
+                pageStructure:
+                  value:
+                    code: page_structure
+                    message: The upstream page contained no story rows.
+        '504':
+          description: The upstream request timed out.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                upstreamTimeout:
+                  value:
+                    code: upstream_timeout
+                    message: The upstream request timed out.
+components:
+  schemas:
+    FilterResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - filter
+        - entries
+        - stats
+        - usageRecorded
+      properties:
+        filter:
+          type: string
+          enum:
+            - more-than-five-words
+            - five-or-fewer-words
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entry'
+        stats:
+          $ref: '#/components/schemas/FilterStats'
+        usageRecorded:
+          type: boolean
+          description: False when usage persistence fails; this does not change a successful filter result into an error.
+    Entry:
+      type: object
+      additionalProperties: false
+      required:
+        - number
+        - title
+        - points
+        - comments
+      properties:
+        number:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        points:
+          type: integer
+          minimum: 0
+        comments:
+          type: integer
+          minimum: 0
+    FilterStats:
+      type: object
+      additionalProperties: false
+      required:
+        - rowsFound
+        - parsed
+        - parseErrors
+        - resultsCount
+        - executionTimeMs
+      properties:
+        rowsFound:
+          type: integer
+          minimum: 0
+        parsed:
+          type: integer
+          minimum: 0
+        parseErrors:
+          type: integer
+          minimum: 0
+        resultsCount:
+          type: integer
+          minimum: 0
+        executionTimeMs:
+          type: number
+          minimum: 0
+    ErrorResponse:
+      type: object
+      description: Public error response; never include stack traces or internal diagnostics.
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - invalid_filter
+            - upstream_timeout
+            - upstream_unavailable
+            - page_structure
+            - internal_error
+        message:
+          type: string
