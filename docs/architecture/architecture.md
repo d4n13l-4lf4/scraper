@@ -143,7 +143,7 @@ Pipes and filters is the **micro-architecture inside the core**. The macro archi
 
   Adding a third filter means adding one registry entry.
 - **Stable ordering.** Equal sort keys keep the original Hacker News order.
-- **The extraction pipeline lives in `infra/hn/`.** Its stages operate on Cheerio elements, so it is deterministic and side-effect free, but it cannot sit in `domain` without breaking the "no third-party imports" rule. The use case only sees it through `EntryParser`.
+- **The Hacker News adapter lives in `infra/hn/`.** This folder owns upstream fetching, page extraction, row parsing, and parser-specific support concepts such as representing an individual row's parse outcome. These concerns stay out of `domain`; their concrete types and file layout are chosen during implementation. The use case only sees parsed entries through `EntryParser`.
 - **Row-level errors do not abort the pipeline.** `parseRow` returns a `ParseResult` (ok or error); `collectStats` counts `rowsFound`, `parsed` and `parseErrors`. A skipped row is not backfilled. Zero rows found raises `PageStructureError`.
 - **Terminology:** a *stage* is a pipeline step; a *filter* is one of the two business operations, defined as a composed pipeline of stages.
 - **Scope of the pattern:** this is synchronous, in-process function composition over at most 30 items. There are no streams, queues or concurrent workers. The pattern is the inspiration, not a framework.

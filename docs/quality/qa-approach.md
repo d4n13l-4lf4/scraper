@@ -398,6 +398,11 @@ The canonical public HTTP contract is maintained as OpenAPI in
 parameters, request and response schemas, status codes, and public error
 codes.
 
+Use **Redocly CLI** for the OpenAPI validation and documentation commands:
+
+- `api:validate` runs `redocly lint docs/api/openapi.yaml`.
+- `api:docs` runs `redocly build-docs docs/api/openapi.yaml --output docs/api/generated/openapi.html`.
+
 For every new or changed HTTP operation:
 
 1. Update and review the OpenAPI contract before implementing the endpoint
@@ -412,9 +417,9 @@ For every new or changed HTTP operation:
    project workflow. If generated output is checked in, verify it is
    reproducible and up to date.
 
-The project must provide documented commands for contract validation and
-reference generation. The specific tooling and command names are implementation
-choices and must remain consistent with the OpenAPI source.
+The project must provide the documented commands above. Keep the generated
+reference at `docs/api/generated/openapi.html`; it is derived from the
+OpenAPI source and must not be edited by hand.
 
 ### 3.7 Architecture tests
 
@@ -450,8 +455,8 @@ The following tools and rules are adopted:
   Architecture            dependency-cruiser      All dependency rules
                                                   pass
 
-  API contract            OpenAPI validator and   The contract is valid and
-                          documentation generator the generated reference is
+  API contract            Redocly CLI             The contract is valid and
+                                                  the generated reference is
                                                   reproducible from the source
 
   Unit coverage           Vitest +                100% statements,
@@ -532,7 +537,9 @@ consistently in `package.json` and the test configuration.
     "test:unit:coverage": "vitest run tests/unit --coverage",
     "test:integration": "vitest run tests/integration",
     "test:acceptance": "cucumber-js",
-    "test:e2e:live": "RUN_LIVE_TESTS=true vitest run tests/e2e/live"
+    "test:e2e:live": "RUN_LIVE_TESTS=true vitest run tests/e2e/live",
+    "api:validate": "redocly lint docs/api/openapi.yaml",
+    "api:docs": "redocly build-docs docs/api/openapi.yaml --output docs/api/generated/openapi.html"
   }
 }
 ```
@@ -544,10 +551,7 @@ TypeScript/ESM-compatible configuration. If environment-variable syntax
 needs to work across operating systems, use a cross-platform solution
 rather than relying on shell-specific syntax.
 
-Provide documented `api:validate` and `api:docs`-equivalent commands that
-validate `docs/api/openapi.yaml` and generate the human-readable API
-reference from that file. The actual script names must match the project
-configuration.
+Add `@redocly/cli` as a development dependency for the API contract commands.
 
 Architecture validation can be exposed as a dedicated script, for
 example:

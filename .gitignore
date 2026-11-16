@@ -255,4 +255,6 @@ fabric.properties
 .idea/**/azureSettings.xml
 .idea
 .opencode
+current
+.specify
 # End of https://www.toptal.com/developers/gitignore/api/node,webstorm

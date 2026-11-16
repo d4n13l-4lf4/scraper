@@ -143,9 +143,13 @@ crawler behavior is implemented.
 - Create the project structure and entry point described in the architecture
   reference.
 - Add the initial declarations for `HackerNewsEntry`, `FilterType`,
-  `ParseResult<T>`, `ScrapeStats`, `UsageLog`, typed domain errors, and the
-  application result contract. These are contracts only; feature behavior is
-  delivered by later stories.
+  `ScrapeStats`, `UsageLog`, typed domain errors, and the application result
+  contract. These are contracts only; feature behavior is delivered by later
+  stories.
+- Keep Hacker News parsing and parser-specific support concepts, including the
+  row parse outcome represented by `ParseResult<T>`, in `src/infra/hn/`.
+  Choose their concrete representation during implementation; this story does
+  not prescribe a class, file, or type shape.
 - Expose a temporary `GET /hello` endpoint that returns a minimal Hello World
   response.
 - Add the `/hello` operation to the canonical OpenAPI document before
@@ -175,9 +179,9 @@ crawler behavior is implemented.
 
 #### Manual review
 
-6. Confirm the contracts listed in Planned work and the folder structure
-   match the architecture reference, and contain no scraping, filtering, or
-   persistence implementation.
+6. Confirm the listed contracts and folder structure match the architecture
+   reference, parser-specific support concepts stay within `src/infra/hn/`,
+   and no scraping, filtering, or persistence behavior is implemented.
 7. Confirm the OpenAPI contract and its generated reference describe the
    `GET /hello` response used by the endpoint.
 8. Confirm the release workflow follows the CI/CD model: a version tag is

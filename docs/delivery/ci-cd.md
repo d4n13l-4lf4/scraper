@@ -9,10 +9,9 @@ status: current
 
 ## Purpose and scope
 
-This document defines the conceptual delivery flow for the Hacker News
-Crawler. It is the reference for a future CI/CD implementation; it does not
-define a GitHub Actions workflow, a Git hook configuration, or a deployment
-script.
+This document defines the delivery flow and implementation choices for the
+Hacker News Crawler. It is the reference for implementing the CI/CD workflow
+and local hook; it does not contain executable workflow or hook configuration.
 
 The quality gates and their requirements are owned by
 [`docs/quality/qa-approach.md`](../quality/qa-approach.md). This document
@@ -41,6 +40,7 @@ Developer commit
 
 - A pre-commit hook runs the unit-test command defined in the QA Approach
   (currently documented as `npm run test:unit`).
+- Use Husky to install and manage the Git hook.
 - A failing unit-test run blocks the commit. Developers can run the same
   command manually while working.
 - The hook is a fast local safeguard, not a replacement for the full CI gate
@@ -48,10 +48,12 @@ Developer commit
 
 ### 2. Pull-request and continuous-integration checks
 
-- Pull requests run the complete set of mandatory checks defined in the QA
-  Approach.
+- Implement this stage in `.github/workflows/ci.yml`, triggered by
+  `pull_request` and pushes to `main`.
+- Pull requests and pushes to `main` run the complete set of mandatory checks
+  defined in the QA Approach.
 - CI verifies the OpenAPI source and generates its human-readable reference
-  using the documented commands from the QA Approach.
+  using `npm run api:validate` and `npm run api:docs`.
 - A pull request cannot be considered ready to merge while a required check
   fails.
 - Pull-request builds are verification artifacts only; this stage does not
@@ -62,17 +64,18 @@ should not silently skip a required gate.
 
 ### 3. Release publication
 
-- A version tag is the trigger for release publication. The exact tag format
-  and versioning policy are implementation decisions to make before the
-  workflow is built.
+- Implement this stage in `.github/workflows/release.yml`, triggered by tags
+  matching `vMAJOR.MINOR.PATCH` (for example, `v1.2.3`).
 - The tagged commit must pass the same mandatory quality gates before
   publication, including the build gate. A failed or incomplete check blocks
   the release.
-- Publish the versioned artifact produced by that successful workflow run as
-  an asset of the corresponding GitHub Release; do not rebuild between
-  verification and publication.
-- The release must identify the source tag/commit and include concise release
-  notes.
+- Package `dist/`, `package.json`, and `package-lock.json` as a versioned
+  `hacker-news-crawler-${TAG}.tar.gz` artifact.
+- Publish the artifact produced by that successful workflow run as an asset of
+  the corresponding GitHub Release; do not rebuild between verification and
+  publication.
+- Use GitHub CLI (`gh release create`) with automatically generated release
+  notes (`--generate-notes`). The release must identify the source tag/commit.
 - A release workflow must not publish from an untagged pull request or from a
   commit whose required checks have failed.
 
@@ -82,7 +85,7 @@ should not silently skip a required gate.
   possible.
 - Grant release publication permission only to the release-publishing job,
   with the minimum GitHub token permissions required to create a release and
-  upload its asset.
+  upload its asset (`contents: write`).
 - Do not store credentials in the repository or embed them in the build
   artifact.
 - Preserve a traceable relationship between the release, source tag/commit,
@@ -90,12 +93,10 @@ should not silently skip a required gate.
 
 ## Decisions deferred to implementation
 
-This conceptual model intentionally leaves the following choices open:
+The following low-level implementation details remain open:
 
-- GitHub Actions workflow names, triggers, and job structure.
-- The pre-commit hook manager and its installation mechanism.
-- The OpenAPI validator and documentation generator.
-- The version-tag convention, build artifact format, and release-note source.
+- Exact GitHub Actions versions, runner images, and job graph.
+- Exact Husky version and installation configuration.
 
 These choices must implement this model and remain consistent with the gate
 definitions in the QA Approach.
