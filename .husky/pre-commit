@@ -1,0 +1,10 @@
+#!/bin/sh
+# Husky pre-commit hook
+# Runs format check, linting, type checking, and unit tests;
+# blocks commit on any failure, permits on success.
+# This is a fast local safeguard, not a replacement for the full CI gate set.
+
+npm run format:check
+npm run lint
+npm run typecheck
+npm run test:unit

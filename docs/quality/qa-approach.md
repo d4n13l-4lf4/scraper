@@ -1,7 +1,7 @@
 ---
 document: QA Approach
 canonical_path: docs/quality/qa-approach.md
-version: 2
+version: 4
 status: current
 ---
 
@@ -20,20 +20,25 @@ and release publication are described in
 `docs/delivery/ci-cd.md`; this document remains authoritative for what each
 quality gate requires.
 
+This document deliberately does not list production folders or file names.
+Where a verification rule depends on the source layout, it is expressed as a
+rule relative to the layout defined in the architecture document, so that
+restructuring the source tree does not require changing this document.
+
 ## 1. Quality objectives
 
 The QA approach is designed to provide confidence that:
 
--   The two canonical filters implement the assignment's rules exactly.
--   HTML extraction, parsing, persistence, and HTTP delivery behave
-    correctly at their boundaries.
--   Application and domain behavior remain independent of network,
-    database, and HTTP frameworks.
--   Changes are developed incrementally using test-first practices.
--   The codebase remains type-safe, consistently formatted, lint-clean,
-    and compliant with its dependency rules.
--   The automated checks are repeatable and suitable for local
-    development and continuous integration.
+- The two canonical filters implement the assignment's rules exactly.
+- HTML extraction, parsing, persistence, and HTTP delivery behave
+  correctly at their boundaries.
+- Application and domain behavior remain independent of network,
+  database, and HTTP frameworks.
+- Changes are developed incrementally using test-first practices.
+- The codebase remains type-safe, consistently formatted, lint-clean,
+  and compliant with its dependency rules.
+- The automated checks are repeatable and suitable for local
+  development and continuous integration.
 
 Tests must verify observable behavior and meaningful outcomes. Achieving
 a coverage target is necessary, but coverage alone is not proof of
@@ -43,21 +48,21 @@ correctness.
 
 ### 2.1 Test-Driven Development is mandatory
 
-Implementation follows the **Red -- Green -- Refactor** cycle:
+Implementation follows the **Red — Green — Refactor** cycle:
 
-1.  **Red --- specify first:** identify a small behavior from a user
-    story or acceptance criterion and write the test before the
-    production implementation.
-2.  Run the test and confirm that it fails for the expected reason. A
-    test that fails because of a broken test setup does not complete
-    this step.
-3.  **Green --- implement minimally:** write the smallest production
-    change that makes the test pass.
-4.  **Refactor --- improve safely:** improve the implementation and,
-    where appropriate, the tests without changing the externally
-    observable behavior.
-5.  Re-run the relevant tests. Before completing the change, run the
-    required quality gates.
+1. **Red — specify first:** identify a small behavior from a user
+   story or acceptance criterion and write the test before the
+   production implementation.
+2. Run the test and confirm that it fails for the expected reason. A
+   test that fails because of a broken test setup does not complete
+   this step.
+3. **Green — implement minimally:** write the smallest production
+   change that makes the test pass.
+4. **Refactor — improve safely:** improve the implementation and,
+   where appropriate, the tests without changing the externally
+   observable behavior.
+5. Re-run the relevant tests. Before completing the change, run the
+   required quality gates.
 
 Work in small vertical slices. Do not write an entire story's
 implementation first and add tests afterwards. Tests are part of the
@@ -67,68 +72,40 @@ implementation, not a final testing phase.
 
 BDD complements TDD:
 
--   **BDD** describes what the system should do from an external,
-    behavior-focused perspective.
--   **TDD** guides the implementation of that behavior through small,
-    failing tests.
+- **BDD** describes what the system should do from an external,
+  behavior-focused perspective.
+- **TDD** guides the implementation of that behavior through small,
+  failing tests.
 
 Acceptance criteria are expressed as Gherkin scenarios where they
-benefit from a readable Given--When--Then specification. These scenarios
+benefit from a readable Given–When–Then specification. These scenarios
 describe externally observable behavior and must not prescribe internal
 classes, functions, or folder structure.
 
 The recommended workflow is:
 
-1.  Derive or refine acceptance scenarios from the user story and its
-    acceptance criteria.
-2.  Use those scenarios to identify the domain, application,
-    infrastructure, and delivery behaviors required.
-3.  Implement each behavior incrementally with unit and integration TDD.
-4.  Run the acceptance scenarios against the assembled application.
-5.  Run the complete quality gates before considering the work done.
+1. Derive or refine acceptance scenarios from the user story and its
+   acceptance criteria.
+2. Use those scenarios to identify the domain, application,
+   infrastructure, and delivery behaviors required.
+3. Implement each behavior incrementally with unit and integration TDD.
+4. Run the acceptance scenarios against the assembled application.
+5. Run the complete quality gates before considering the work done.
 
 A Gherkin scenario may remain failing while its vertical slice is being
 implemented, but it must pass before the related story is accepted.
 
 ## 3. Test types, tools, and responsibilities
 
-  ------------------------------------------------------------------------
-  Test level              Tool / approach          Primary responsibility
-  ----------------------- ------------------------ -----------------------
-  Unit                    Vitest                   Verify isolated domain
-                                                   and application
-                                                   behavior quickly and
-                                                   deterministically
-
-  Infrastructure          Vitest                   Verify real
-  integration                                      infrastructure
-                                                   components together,
-                                                   using controlled
-                                                   external boundaries
-
-  HTTP adapter            Vitest + Fastify         Verify routes,
-  integration             `inject`                 validation, response
-                                                   mapping, and error
-                                                   handling without
-                                                   opening a network port
-
-  Acceptance / E2E        Gherkin + Cucumber.js    Verify complete
-                          (`@cucumber/cucumber`)   user-visible REST
-                                                   behavior through the
-                                                   assembled application
-
-  Architecture            dependency-cruiser       Enforce allowed
-                                                   dependency directions
-                                                   and prevent forbidden
-                                                   imports
-
-  Coverage                Vitest +                 Measure and enforce
-                          `@vitest/coverage-v8`    unit-test coverage
-
-  Static quality          TypeScript, ESLint,      Enforce type safety,
-                          Prettier                 code-quality rules, and
-                                                   consistent formatting
-  ------------------------------------------------------------------------
+| Test level                 | Tool / approach                              | Primary responsibility                                                                         |
+| -------------------------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Unit                       | Vitest                                       | Verify isolated domain and application behavior quickly and deterministically                  |
+| Infrastructure integration | Vitest                                       | Verify real infrastructure components together, using controlled external boundaries           |
+| HTTP adapter integration   | Vitest + Fastify `inject`                    | Verify routes, validation, response mapping, and error handling without opening a network port |
+| Acceptance / E2E           | Gherkin + Cucumber.js (`@cucumber/cucumber`) | Verify complete user-visible REST behavior through the assembled application                   |
+| Architecture               | dependency-cruiser                           | Enforce allowed dependency directions and prevent forbidden imports                            |
+| Coverage                   | Vitest + `@vitest/coverage-v8`               | Measure and enforce unit-test coverage                                                         |
+| Static quality             | TypeScript, ESLint, Prettier                 | Enforce type safety, code-quality rules, and consistent formatting                             |
 
 Vitest remains the runner for unit and integration tests. Cucumber.js is
 used for Gherkin-based acceptance/E2E scenarios. Gherkin is the scenario
@@ -142,11 +119,11 @@ required. The E2E target is the REST API.
 
 Unit tests cover:
 
--   Pure domain behavior: word counting, pipeline stages, filter
-    definitions and registry behavior, and typed error behavior where
-    applicable.
--   Application use-case behavior: orchestration, port interactions,
-    usage-recording behavior, and failure paths.
+- Pure domain behavior: word counting, pipeline stages, filter
+  definitions and registry behavior, and typed error behavior where
+  applicable.
+- Application use-case behavior: orchestration, port interactions,
+  usage-recording behavior, and failure paths.
 
 Unit tests must not make real network calls or depend on a real
 database. Application tests use controlled fakes or stubs for outbound
@@ -161,7 +138,7 @@ rather than forcing every adapter into isolated unit tests.
 Use Vitest's `describe` and `it` functions. Test names follow the
 **"should ..."** convention:
 
-``` typescript
+```typescript
 describe('wordCounter', () => {
   it('should return zero for an empty title', () => {
     expect(wordCounter('')).toBe(0);
@@ -179,85 +156,85 @@ describe('wordCounter', () => {
 
 Conventions:
 
--   A `describe` block identifies the module or behavior under test.
--   Each `it` describes one expected behavior and starts with "should".
--   Tests are deterministic, independent, and focused.
--   Use table-driven tests (`it.each`) for related examples and boundary
-    values.
--   Assert meaningful results and side effects at the relevant boundary;
-    avoid tests that merely repeat the implementation.
--   Do not test private implementation details when the behavior can be
-    verified through the public contract.
+- A `describe` block identifies the module or behavior under test.
+- Each `it` describes one expected behavior and starts with "should".
+- Tests are deterministic, independent, and focused.
+- Use table-driven tests (`it.each`) for related examples and boundary
+  values.
+- Assert meaningful results and side effects at the relevant boundary;
+  avoid tests that merely repeat the implementation.
+- Do not test private implementation details when the behavior can be
+  verified through the public contract.
 
-#### Unit test directory mirrors `src`
+#### Unit test directory mirrors the source tree
 
-The unit-test tree must resemble the production source tree so that
-tests are easy to locate alongside the code they cover. For example:
+The unit-test tree under `tests/unit/` is a structural mirror of the
+production tree under `src/`. The mirroring is defined by a rule, not by a
+list of folders, so it follows the layout in the architecture document
+automatically:
 
-``` text
-src/
-├── domain/
-│   ├── models.ts
-│   ├── errors.ts
-│   ├── word-counter.ts
-│   ├── pipeline/
-│   │   ├── pipe.ts
-│   │   └── stages.ts
-│   └── filters/
-│       ├── definitions.ts
-│       └── registry.ts
-└── application/
-    └── use-cases/
-        └── run-filter-service.ts
+- **Path rule.** A production file at `src/<path>/<name>.ts` is covered by a
+  unit-test file at `tests/unit/<path>/<name>.test.ts`. `<path>` is the same
+  directory path in both trees, and `<name>` is the full production file
+  name without its `.ts` extension, including any role suffix.
+- **Moves and renames.** When a production file is moved or renamed, its
+  unit-test file is moved or renamed in the same change so the mirror is
+  preserved. The same applies to folders.
+- **Tests are created on demand.** Create a test file when there is
+  behavior worth testing. Interface-only port declarations, type-only
+  files, and other files without runtime behavior do not need artificial
+  standalone tests; their contracts are exercised through the services and
+  adapters that use or implement them.
+- **Scope.** The rule applies to production code that is unit-tested under
+  §3.2 and §3.1, that is, the domain and application layers of every module.
+  Code verified primarily at other levels (infrastructure, presentation,
+  composition roots) is organized as described in §5.
+- **No second definition.** The source layout itself, including module and
+  layer folder names, is defined in `docs/architecture/architecture.md`. If
+  the layout changes, only the production code and its mirrored tests move;
+  this document stays unchanged.
 
-tests/
-└── unit/
-    ├── domain/
-    │   ├── models.test.ts
-    │   ├── errors.test.ts
-    │   ├── word-counter.test.ts
-    │   ├── pipeline/
-    │   │   ├── pipe.test.ts
-    │   │   └── stages.test.ts
-    │   └── filters/
-    │       ├── definitions.test.ts
-    │       └── registry.test.ts
-    └── application/
-        └── use-cases/
-            └── run-filter-service.test.ts
+Illustration of the rule with placeholder paths:
+
+```text
+src/<path>/word-counter.ts           ↔  tests/unit/<path>/word-counter.test.ts
+src/<path>/run-filter.use-case.ts    ↔  tests/unit/<path>/run-filter.use-case.test.ts
 ```
 
-This is an illustrative mapping: create a test file when there is
-behavior worth testing. Interface-only port declarations do not need
-artificial standalone tests; their contracts are exercised through the
-application services and adapters that use or implement them.
+Because the mirror is mechanical, reviewers can verify it by comparing the
+two trees, and an optional lightweight script may check that every file
+under `tests/unit/` has a matching production file. Such a check is added
+only if the mirror starts to drift.
 
 ### 3.2 Unit coverage target
 
 The required target is **100% coverage** for unit-testable production
-code in:
-
--   `src/domain/**`
--   `src/application/**`
+code in the **domain and application layers of every module**, as those
+layers are defined in `docs/architecture/architecture.md`.
 
 The 100% target applies independently to:
 
--   Statements
--   Branches
--   Functions
--   Lines
+- Statements
+- Branches
+- Functions
+- Lines
 
 Coverage is enforced by the Vitest coverage configuration and must fail
-the relevant CI check if any threshold is missed.
+the relevant CI check if any threshold is missed. The coverage `include`
+patterns in that configuration are derived from the architecture
+document's layer definitions; they are the only place where layer paths
+are written for this purpose, and they are updated together with the
+source layout when it changes. A newly added module must be covered by
+those patterns without further changes to this document.
 
 The target includes meaningful error and boundary paths, not only happy
 paths. Exclusions should be exceptional, narrowly scoped, and documented
 with a reason. Do not exclude business logic simply to make the report
 pass.
 
-Infrastructure and delivery adapters are verified primarily through
-their integration and acceptance tests; the unit coverage target is not
-a blanket requirement for every line of adapter or bootstrap code.
+Infrastructure, presentation, and composition code are verified primarily
+through their integration and acceptance tests; the unit coverage target
+is not a blanket requirement for every line of that code.
 
 Coverage is a measure of execution, not a substitute for good
 assertions. Tests must still verify correct values, ordering, error
@@ -268,27 +245,12 @@ behavior, and relevant persistence or logging outcomes.
 Infrastructure integration tests verify concrete implementations against
 controlled dependencies.
 
-  -----------------------------------------------------------------------
-  Component                           Test approach
-  ----------------------------------- -----------------------------------
-  Hacker News fetcher                 Stub native `fetch`; verify
-                                      successful response, non-2xx
-                                      response, network failure, timeout,
-                                      and elapsed-time behavior
-
-  Hacker News parser                  Use saved HTML fixtures and the
-                                      real Cheerio parser; verify
-                                      extraction and parsing rules
-
-  SQLite repository                   Use a real `better-sqlite3`
-                                      in-memory database; verify schema
-                                      creation, inserts, reads,
-                                      constraints, and idempotency
-
-  Clock adapter                       Use focused tests where useful;
-                                      application tests should inject a
-                                      controlled `Clock` port
-  -----------------------------------------------------------------------
+| Component           | Test approach                                                                                                          |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Hacker News fetcher | Stub native `fetch`; verify successful response, non-2xx response, network failure, timeout, and elapsed-time behavior |
+| Hacker News parser  | Use saved HTML fixtures and the real Cheerio parser; verify extraction and parsing rules                               |
+| SQLite repository   | Use a real `better-sqlite3` in-memory database; verify schema creation, inserts, reads, constraints, and idempotency   |
+| Clock adapter       | Use focused tests where useful; application tests should inject a controlled `Clock` port                              |
 
 Parser fixtures should cover representative page structures, including a
 normal page, fewer than 30 entries, job posts or other non-story rows,
@@ -308,16 +270,16 @@ application and inject a fake or stub implementation of the inbound
 
 Verify:
 
--   Valid query parameters invoke the application port with the expected
-    input.
--   Invalid or missing filter identifiers are rejected as specified.
--   Application results are mapped to the documented HTTP response DTO.
--   Successful and error responses conform to `docs/api/openapi.yaml`.
--   Typed application/domain errors map to the correct HTTP status and
-    error body.
--   Unexpected errors do not expose stack traces or internal details.
--   The adapter does not require a listening TCP port for its
-    integration tests.
+- Valid query parameters invoke the application port with the expected
+  input.
+- Invalid or missing filter identifiers are rejected as specified.
+- Application results are mapped to the documented HTTP response DTO.
+- Successful and error responses conform to `docs/api/openapi.yaml`.
+- Typed application/domain errors map to the correct HTTP status and
+  error body.
+- Unexpected errors do not expose stack traces or internal details.
+- The adapter does not require a listening TCP port for its
+  integration tests.
 
 These tests verify the HTTP adapter boundary; they do not replace tests
 of the real use case or the infrastructure adapters.
@@ -333,7 +295,7 @@ of the normal verification workflow, while live-site checks are not.
 
 Example:
 
-``` gherkin
+```gherkin
 Feature: Filter Hacker News entries
 
   Scenario: Filter entries with more than five words
@@ -345,7 +307,7 @@ Feature: Filter Hacker News entries
 
 A failure scenario may be expressed as:
 
-``` gherkin
+```gherkin
 Feature: Handle an unavailable Hacker News service
 
   Scenario: The upstream service is unavailable
@@ -366,11 +328,11 @@ specification.
 The default deterministic acceptance suite must not depend on the public
 Hacker News service. It should use:
 
--   The real application composition and HTTP adapter.
--   A controlled local upstream HTTP server or equivalent deterministic
-    upstream boundary.
--   A temporary SQLite database.
--   Known HTML fixtures and predictable responses.
+- The real application composition and HTTP adapter.
+- A controlled local upstream HTTP server or equivalent deterministic
+  upstream boundary.
+- A temporary SQLite database.
+- Known HTML fixtures and predictable responses.
 
 This verifies the full application flow without making CI dependent on
 an external website.
@@ -380,13 +342,13 @@ an external website.
 A separate, explicitly opt-in smoke test may call the real Hacker News
 website to detect major changes in the upstream page structure. It must:
 
--   Be excluded from the default test and CI suites.
--   Be invoked only through a dedicated command or explicit Cucumber
-    tag.
--   Avoid assertions that depend on volatile story titles, points, or
-    comment counts.
--   Report upstream/network failures distinctly from application
-    regressions.
+- Be excluded from the default test and CI suites.
+- Be invoked only through a dedicated command or explicit Cucumber
+  tag.
+- Avoid assertions that depend on volatile story titles, points, or
+  comment counts.
+- Report upstream/network failures distinctly from application
+  regressions.
 
 Live-site tests are supplementary diagnostics, not a substitute for
 deterministic tests.
@@ -430,43 +392,23 @@ boundary; do not redefine those rules here.
 
 Architecture checks are automated and mandatory, and are not expressed
 as a coverage percentage. The configuration must enforce the documented
-layer boundaries and reject circular dependencies. Any intentional
-exception must be reviewed and documented in the architecture document
-before the rule is changed.
+layer and module boundaries and reject circular dependencies. Any
+intentional exception must be reviewed and documented in the architecture
+document before the rule is changed.
 
 ## 4. Static quality gates
 
 The following tools and rules are adopted:
 
-  -----------------------------------------------------------------------
-  Gate                    Tool                    Required outcome
-  ----------------------- ----------------------- -----------------------
-  Type checking           TypeScript              Strict type checking
-                          (`tsc --noEmit`)        passes
-
-  Linting                 ESLint +                Zero errors and zero
-                          `typescript-eslint`     warnings
-
-  Formatting              Prettier                `prettier --check`
-                                                  passes for tracked
-                                                  source and
-                                                  documentation
-
-  Architecture            dependency-cruiser      All dependency rules
-                                                  pass
-
-  API contract            Redocly CLI             The contract is valid and
-                                                  the generated reference is
-                                                  reproducible from the source
-
-  Unit coverage           Vitest +                100% statements,
-                          `@vitest/coverage-v8`   branches, functions,
-                                                  and lines in `domain`
-                                                  and `application`
-
-  Build                   TypeScript compiler     Production build
-                                                  succeeds
-  -----------------------------------------------------------------------
+| Gate          | Tool                           | Required outcome                                                                                            |
+| ------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Type checking | TypeScript (`tsc --noEmit`)    | Strict type checking passes                                                                                 |
+| Linting       | ESLint + `typescript-eslint`   | Zero errors and zero warnings                                                                               |
+| Formatting    | Prettier                       | `prettier --check` passes for tracked source and documentation                                              |
+| Architecture  | dependency-cruiser             | All dependency rules pass                                                                                   |
+| API contract  | Redocly CLI                    | The contract is valid and the generated reference is reproducible from the source                           |
+| Unit coverage | Vitest + `@vitest/coverage-v8` | 100% statements, branches, functions, and lines in the domain and application layers of every module (§3.2) |
+| Build         | Webpack production bundle      | `npm run build` succeeds and emits the ESM bundle at `dist/bundle.js`                                       |
 
 ESLint should catch, at minimum, unused variables and imports, unsafe or
 unjustified `any`, floating promises, unreachable code, and problematic
@@ -480,19 +422,13 @@ TypeScript should use strict mode and appropriate safeguards such as
 ## 5. Test organization
 
 The following is the intended test layout. It can grow as implementation
-requires, while retaining the unit-to-source mirroring rule.
+requires, while retaining the unit-to-source mirroring rule in §3.1.
 
-``` text
+```text
 tests/
-├── unit/
-│   ├── domain/                 mirrors src/domain/
-│   └── application/            mirrors src/application/
-├── integration/
-│   ├── infra/
-│   │   ├── hn/
-│   │   └── sqlite/
-│   └── adapters/
-│       └── http/
+├── unit/                       mirrors src/ by the path rule in §3.1
+├── integration/                grouped by the infrastructure component or
+│                               presentation adapter under test
 ├── acceptance/
 │   ├── features/
 │   │   └── *.feature
@@ -513,6 +449,15 @@ tests/
     └── test-database.ts
 ```
 
+`tests/unit/` is not listed folder by folder on purpose: its structure is
+whatever the source tree under `src/` is, per §3.1.
+
+Integration tests are named after the component they verify, using the
+component names from the architecture document (for example, the Hacker
+News fetcher, the SQLite repository, or the HTTP route of a module). They
+are not required to mirror the source path, and their grouping may change
+without affecting the unit-test rule.
+
 Shared helpers should remain small and explicit. Avoid building a
 general-purpose test framework for this small application.
 
@@ -522,7 +467,7 @@ The scripts below describe the intended developer workflow. Exact
 command names and Cucumber configuration should be implemented
 consistently in `package.json` and the test configuration.
 
-``` json
+```json
 {
   "scripts": {
     "lint": "eslint .",
@@ -530,7 +475,8 @@ consistently in `package.json` and the test configuration.
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "typecheck": "tsc --noEmit",
-    "build": "tsc",
+    "build": "webpack",
+    "start": "node dist/bundle.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run tests/unit",
@@ -556,7 +502,7 @@ Add `@redocly/cli` as a development dependency for the API contract commands.
 Architecture validation can be exposed as a dedicated script, for
 example:
 
-``` json
+```json
 {
   "scripts": {
     "test:architecture": "depcruise src --config .dependency-cruiser.cjs"
@@ -572,19 +518,19 @@ file committed to the repository.
 The following checks are mandatory for a change to be considered ready
 to merge:
 
-1.  Install dependencies reproducibly (`npm ci`).
-2.  Check formatting (`npm run format:check`).
-3.  Run linting (`npm run lint`).
-4.  Run strict type checking (`npm run typecheck`).
-5.  Run architecture checks (`npm run test:architecture`).
-6.  Validate the OpenAPI contract and generate the API reference using the
-    documented commands.
-7.  Run unit tests with the 100% coverage thresholds
-    (`npm run test:unit:coverage`).
-8.  Run infrastructure and HTTP integration tests
-    (`npm run test:integration`).
-9.  Run deterministic acceptance/E2E scenarios
-    (`npm run test:acceptance`).
+1. Install dependencies reproducibly (`npm ci`).
+2. Check formatting (`npm run format:check`).
+3. Run linting (`npm run lint`).
+4. Run strict type checking (`npm run typecheck`).
+5. Run architecture checks (`npm run test:architecture`).
+6. Validate the OpenAPI contract and generate the API reference using the
+   documented commands.
+7. Run unit tests with the 100% coverage thresholds
+   (`npm run test:unit:coverage`).
+8. Run infrastructure and HTTP integration tests
+   (`npm run test:integration`).
+9. Run deterministic acceptance/E2E scenarios
+   (`npm run test:acceptance`).
 10. Build the production application (`npm run build`).
 
 The live-site smoke test is not a mandatory CI gate because it depends
@@ -592,90 +538,59 @@ on an external service.
 
 A story or change is done only when:
 
--   Its acceptance criteria are represented by appropriate automated
-    tests.
--   Tests were written before the corresponding implementation,
-    following Red--Green--Refactor.
--   Relevant unit, integration, and acceptance tests pass.
--   The domain/application unit coverage target remains at 100% for all
-    four metrics.
--   Static quality and architecture checks pass.
--   HTTP changes follow the OpenAPI document-first workflow in §3.6; the
-    contract validates and the generated reference is current.
--   Documentation is updated when behavior, architecture, configuration,
-    or developer workflow changes.
--   The change is committed in small, understandable increments using
-    the repository's agreed Git conventions.
+- Its acceptance criteria are represented by appropriate automated
+  tests.
+- Tests were written before the corresponding implementation,
+  following Red–Green–Refactor.
+- Relevant unit, integration, and acceptance tests pass.
+- The domain and application unit coverage target remains at 100% for
+  all four metrics.
+- New or moved production files in the unit-tested layers have their unit
+  tests in the mirrored location (§3.1).
+- Static quality and architecture checks pass.
+- HTTP changes follow the OpenAPI document-first workflow in §3.6; the
+  contract validates and the generated reference is current.
+- Documentation is updated when behavior, architecture, configuration,
+  or developer workflow changes.
+- The change is committed in small, understandable increments using
+  the repository's agreed Git conventions.
 
 ## 8. Practical testing principles
 
--   Prefer deterministic tests; control time, network responses, and
-    database state.
--   Use the real library when testing an integration with that library;
-    stub only boundaries that must be controlled.
--   Keep unit tests fast and isolated.
--   Keep Gherkin scenarios few, readable, and focused on user-visible
-    behavior.
--   Test both success and failure paths, including boundary conditions.
--   Preserve the original Hacker News ordering when sort keys tie, as
-    required by the product behavior.
--   Do not make the live website a prerequisite for local development or
-    CI.
--   Treat test failures as information: fix the behavior or the test
-    setup rather than weakening assertions to obtain a green build.
+- Prefer deterministic tests; control time, network responses, and
+  database state.
+- Use the real library when testing an integration with that library;
+  stub only boundaries that must be controlled.
+- Keep unit tests fast and isolated.
+- Keep Gherkin scenarios few, readable, and focused on user-visible
+  behavior.
+- Test both success and failure paths, including boundary conditions.
+- Preserve the original Hacker News ordering when sort keys tie, as
+  required by the product behavior.
+- Do not make the live website a prerequisite for local development or
+  CI.
+- Treat test failures as information: fix the behavior or the test
+  setup rather than weakening assertions to obtain a green build.
 
-------------------------------------------------------------------------
+---
 
 ## 9. Decisions summary
 
-  -----------------------------------------------------------------------
-  Decision                            Status
-  ----------------------------------- -----------------------------------
-  TDD Red--Green--Refactor is the     Adopted
-  required development method         
-
-  Unit tests use Vitest and "should   Adopted
-  ..." naming                         
-
-  Unit test folders mirror the `src`  Adopted
-  structure                           
-
-  Domain and application unit-test    Adopted
-  coverage is 100% for statements,    
-  branches, functions, and lines      
-
-  Infrastructure and HTTP adapter     Adopted
-  integration tests use Vitest        
-
-  Fastify HTTP tests use              Adopted
-  `fastify.inject()`                  
-
-  SQLite integration tests use a real Adopted
-  in-memory database                  
-
-  Acceptance/E2E behavior is          Adopted
-  specified in Gherkin and executed   
-  with Cucumber.js                    
-
-  Deterministic acceptance tests use  Adopted
-  controlled dependencies; live HN    
-  checks are opt-in                    
-
-  dependency-cruiser enforces         Adopted
-  architecture boundaries             
-
-  OpenAPI is the HTTP contract-first  Adopted
-  source; API reference docs are      
-  generated from it                    
-
-  TypeScript,                         Adopted
-  ESLint/typescript-eslint, and       
-  Prettier are mandatory quality      
-  gates                               
-
-  All required checks must pass       Adopted
-  before merge                        
-  -----------------------------------------------------------------------
+| Decision                                                                                                          | Status  |
+| ----------------------------------------------------------------------------------------------------------------- | ------- |
+| TDD Red–Green–Refactor is the required development method                                                         | Adopted |
+| Unit tests use Vitest and "should ..." naming                                                                     | Adopted |
+| Unit-test folders mirror the `src` tree by a path rule; this document does not list production folders            | Adopted |
+| Domain and application unit-test coverage is 100% for statements, branches, functions, and lines, in every module | Adopted |
+| Infrastructure and HTTP adapter integration tests use Vitest                                                      | Adopted |
+| Fastify HTTP tests use `fastify.inject()`                                                                         | Adopted |
+| SQLite integration tests use a real in-memory database                                                            | Adopted |
+| Acceptance/E2E behavior is specified in Gherkin and executed with Cucumber.js                                     | Adopted |
+| Deterministic acceptance tests use controlled dependencies; live HN checks are opt-in                             | Adopted |
+| dependency-cruiser enforces architecture boundaries                                                               | Adopted |
+| OpenAPI is the HTTP contract-first source; API reference docs are generated from it                               | Adopted |
+| TypeScript, ESLint/typescript-eslint, and Prettier are mandatory quality gates                                    | Adopted |
+| All required checks must pass before merge                                                                        | Adopted |
 
 This document records the agreed QA approach. Implementation details
 such as exact script names, configuration filenames, and fixture

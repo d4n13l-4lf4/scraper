@@ -1,7 +1,7 @@
 ---
 document: Product Backlog
 canonical_path: docs/requirements/product_backlog.md
-version: 2
+version: 4
 status: current
 ---
 
@@ -14,13 +14,13 @@ user stories, dependencies, and milestones. It is not the source of truth for
 architecture or quality practices:
 
 - System structure, boundaries, and implementation design are defined in
-  [`docs/architecture/architecture.md`](../architecture/architecture.md).
+  [`docs/architecture/architecture.md` v4](../architecture/architecture.md).
 - Test practices, test levels, tools, coverage, and quality gates are defined
-  in [`docs/quality/qa-approach.md`](../quality/qa-approach.md).
+  in [`docs/quality/qa-approach.md` v4](../quality/qa-approach.md).
 - The public HTTP contract is defined in
   [`docs/api/openapi.yaml`](../api/openapi.yaml).
 - Pipeline orchestration and release publication are described in
-  [`docs/delivery/ci-cd.md`](../delivery/ci-cd.md).
+  [`docs/delivery/ci-cd.md` v4](../delivery/ci-cd.md).
 
 Stories may reference those documents where implementation or verification
 must follow an established decision. They do not restate those decisions.
@@ -59,10 +59,10 @@ follow the architecture and QA references above.
 
 The same identifiers are used in requests and returned results.
 
-| Identifier | Included titles | Ordering |
-| --- | --- | --- |
+| Identifier             | Included titles      | Ordering             |
+| ---------------------- | -------------------- | -------------------- |
 | `more-than-five-words` | More than five words | Comments, descending |
-| `five-or-fewer-words` | Five or fewer words | Points, descending |
+| `five-or-fewer-words`  | Five or fewer words  | Points, descending   |
 
 Equal sort values preserve the original Hacker News order.
 
@@ -72,15 +72,15 @@ A word is a whitespace-separated token containing at least one Unicode
 letter or number. Punctuation-only tokens do not count; punctuation attached
 to a word does not add a word; a hyphenated expression is one token.
 
-| Title | Count |
-| --- | ---: |
-| `Hello World` | 2 |
-| `This is - a self-explained example` | 5 |
-| `!!! - ???` | 0 |
-| `Hello, world!` | 2 |
-| `One-two three` | 2 |
-| `AI: What's new?` | 3 |
-| `C++ is 100% fun` | 4 |
+| Title                                | Count |
+| ------------------------------------ | ----: |
+| `Hello World`                        |     2 |
+| `This is - a self-explained example` |     5 |
+| `!!! - ???`                          |     0 |
+| `Hello, world!`                      |     2 |
+| `One-two three`                      |     2 |
+| `AI: What's new?`                    |     3 |
+| `C++ is 100% fun`                    |     4 |
 
 #### Story data and page behavior
 
@@ -141,23 +141,25 @@ crawler behavior is implemented.
 **Planned work:**
 
 - Create the project structure and entry point described in the architecture
-  reference.
+  reference v4 (module-based structure with `modules/hello`, `shared/`,
+  `app/`, `bootstrap.ts`).
 - Add the initial declarations for `HackerNewsEntry`, `FilterType`,
   `ScrapeStats`, `UsageLog`, typed domain errors, and the application result
   contract. These are contracts only; feature behavior is delivered by later
   stories.
 - Keep Hacker News parsing and parser-specific support concepts, including the
-  row parse outcome represented by `ParseResult<T>`, in `src/infra/hn/`.
-  Choose their concrete representation during implementation; this story does
-  not prescribe a class, file, or type shape.
+  row parse outcome represented by `ParseResult<T>`, in
+  `modules/entries/infrastructure/hacker-news/`. Choose their concrete
+  representation during implementation; this story does not prescribe a class,
+  file, or type shape.
 - Expose a temporary `GET /hello` endpoint that returns a minimal Hello World
   response.
 - Add the `/hello` operation to the canonical OpenAPI document before
   implementing the route, and generate the human-readable API reference.
 - Add automated tests for the endpoint and set up the required quality-check
-  commands described by the QA approach.
+  commands described by the QA approach v4.
 - Implement the pre-commit hook and GitHub Actions CI/release workflows
-  described by the CI/CD model.
+  described by the CI/CD model v4.
 
 **Acceptance criteria:**
 
@@ -175,16 +177,18 @@ crawler behavior is implemented.
    **when** the pre-commit hook runs, **then** it succeeds.
 5. **Given** a pull request containing this story is checked, **when** the CI
    pipeline completes, **then** all required checks defined by the QA approach
-   pass, including the applicable tests, contract checks, and build.
+   v4 pass, including the applicable tests, contract checks, and build.
 
 #### Manual review
 
 6. Confirm the listed contracts and folder structure match the architecture
-   reference, parser-specific support concepts stay within `src/infra/hn/`,
-   and no scraping, filtering, or persistence behavior is implemented.
+   reference v4 (module-based structure with `modules/hello`, `shared/`,
+   `app/`, `bootstrap.ts`), parser-specific support concepts stay within
+   `modules/entries/infrastructure/hacker-news/`, and no scraping, filtering,
+   or persistence behavior is implemented.
 7. Confirm the OpenAPI contract and its generated reference describe the
    `GET /hello` response used by the endpoint.
-8. Confirm the release workflow follows the CI/CD model: a version tag is
+8. Confirm the release workflow follows the CI/CD model v4: a version tag is
    required, failed gates prevent publication, and the verified build artifact
    is what would be attached to a GitHub Release. No actual release needs to
    be published to accept this story.
@@ -234,7 +238,7 @@ structured data **so that** filtering does not depend on raw HTML.
   story fields.
 - Apply the parsing behavior specified in the product contract.
 - Provide representative page examples for the required cases, following the
-  QA approach.
+  QA approach v4.
 
 **Acceptance criteria:**
 
@@ -247,7 +251,7 @@ structured data **so that** filtering does not depend on raw HTML.
    rank, title, points, and comment count are returned correctly.
 4. **Given** fewer than 30 story rows, **when** the page is parsed,
    **then** all valid entries are returned without artificial entries.
-5. **Given** a story row has no points value, **when** it is parsed,
+5. **Given** a valid story row has no points value, **when** it is parsed,
    **then** its points value is zero.
 6. **Given** a story has a `discuss` link or no comment link, **when** it is
    parsed, **then** its comment count is zero.
@@ -259,7 +263,7 @@ structured data **so that** filtering does not depend on raw HTML.
    **when** the page is parsed, **then** that row is skipped, the parse-error
    count increases by one, and a later row is not used to replace it.
 10. **Given** a page contains zero story rows, **when** parsing completes,
-   **then** a page-structure failure is reported rather than an empty success.
+    **then** a page-structure failure is reported rather than an empty success.
 11. **Given** navigation links are present on the page, **when** it is parsed,
     **then** they are not returned or counted as stories.
 
@@ -274,7 +278,7 @@ structured data **so that** filtering does not depend on raw HTML.
 
 - Implement the word-count behavior described in the product contract.
 - Include boundary and representative Unicode cases in the verification
-  scenarios, following the QA approach.
+  scenarios, following the QA approach v4.
 
 **Acceptance criteria:**
 
@@ -304,7 +308,7 @@ filter options **so that** each request applies a known product rule.
 
 - Make the canonical filter identifiers and their product behavior available
   to the request-processing workflow.
-- Follow the filter organization in the architecture reference without
+- Follow the filter organization in the architecture reference v4 without
   restating its implementation design here.
 
 **Acceptance criteria:**
@@ -373,7 +377,7 @@ reliably **so that** requests can be recorded without manual database setup.
 **Planned work:**
 
 - Initialize the selected usage store using the storage decisions in the
-  architecture reference.
+  architecture reference v4.
 - Support the configured storage location and a test-friendly isolated
   storage mode as specified by the architecture and QA references.
 
@@ -434,7 +438,7 @@ with useful context **so that** I can inspect usage and crawler behavior.
 **Planned work:**
 
 - Coordinate filter selection, story retrieval, parsing, filtering, and usage
-  recording as defined by the product behavior and architecture reference.
+  recording as defined by the product behavior and architecture reference v4.
 - Preserve the specified outcomes when a step fails.
 
 **Acceptance criteria:**
@@ -472,7 +476,7 @@ retrieve matching Hacker News entries from a client.
   contract. If its public behavior needs to change, update the contract first.
 - Retire the temporary `GET /hello` scaffold endpoint when the product
   endpoint is ready.
-- Use the HTTP adapter boundaries in the architecture reference.
+- Use the HTTP adapter boundaries in the architecture reference v4.
 
 **Acceptance criteria:**
 
@@ -547,8 +551,8 @@ independently.
 - Document the product, installation, configuration, endpoint usage,
   filtering behavior, usage records, and limitations in the README.
 - Link to the canonical OpenAPI contract and its generated API reference.
-- Link to the CI/CD model without duplicating its pipeline instructions.
-- Link to the architecture and QA documents instead of reproducing their
+- Link to the CI/CD model v4 without duplicating its pipeline instructions.
+- Link to the architecture v4 and QA v4 documents instead of reproducing their
   definitions.
 - Verify the documented workflow from a clean checkout.
 
@@ -562,13 +566,13 @@ independently.
    shape.
 3. **Given** the README describes implementation structure or verification,
    **when** a reviewer follows its links, **then** they reach the current
-   architecture and QA reference documents without relying on duplicated
+   architecture v4 and QA v4 reference documents without relying on duplicated
    definitions.
 4. **Given** a reviewer needs the HTTP API contract, **when** they follow the
    README's API documentation link, **then** they can access the OpenAPI source
    and the generated human-readable reference.
 5. **Given** the documented test workflow is followed, **when** the required
-   checks are run, **then** their behavior matches the QA approach.
+   checks are run, **then** their behavior matches the QA approach v4.
 6. **Given** the service is started with no pre-created usage store,
    **when** a valid request is made, **then** usage storage is initialized
    automatically and the request can be recorded.
@@ -598,10 +602,10 @@ US-09 → US-10 REST delivery → US-11 Failure responses → US-12 Handoff
 
 ### Backlog-wide references
 
-- Use `docs/architecture/architecture.md` for architecture and
+- Use `docs/architecture/architecture.md` v4 for architecture and
   implementation-boundary decisions.
-- Use `docs/quality/qa-approach.md` for test design and execution,
+- Use `docs/quality/qa-approach.md` v4 for test design and execution,
   development practices, and the Definition of Done.
 - Acceptance criteria in each story are the behavior or deliverable to
-  demonstrate for that story; the referenced QA approach determines suitable
+  demonstrate for that story; the referenced QA approach v4 determines suitable
   verification methods and required project-wide gates.
