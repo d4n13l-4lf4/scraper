@@ -131,96 +131,65 @@ reference.
 
 ## Phase 1 — Project foundation
 
-### US-01: Establish a runnable project foundation
+### US-01: Establish the project scaffold with a Hello World endpoint
 
-**As a** developer, **I want** a buildable service foundation **so that** the
-planned product capabilities can be delivered incrementally.
-
-**Planned work:**
-
-- Initialize the repository and package metadata for the selected project
-  platform.
-- Add the application entry point, configuration inputs, and documented
-  startup commands.
-- Follow the project structure and implementation constraints in the
-  architecture reference.
-
-**Acceptance criteria:**
-
-1. **Given** a clean checkout and the runtime declared by the project,
-   **when** a developer follows the installation instructions, **then**
-   dependencies install without errors.
-2. **Given** the installed project, **when** the production build command is
-   run, **then** it succeeds and produces the configured build output.
-3. **Given** the service is started with default settings, **when** startup
-   completes, **then** it uses the documented defaults and reports a startup
-   failure clearly if it cannot bind or initialize a required resource.
-4. **Given** an operator supplies supported configuration values, **when** the
-   service starts, **then** those values are used instead of their defaults.
-
----
-
-### US-02: Prepare the automated verification workflow
-
-**As a** developer, **I want** the required quality checks available from the
-project **so that** changes can be verified consistently before delivery.
+**As a** developer, **I want** the initial project structure, domain
+contracts, and a minimal Hello World endpoint **so that** the architecture,
+API documentation, tests, and delivery workflow can be demonstrated before
+crawler behavior is implemented.
 
 **Planned work:**
 
-- Configure the project checks and command interface specified by the QA
-  approach.
-- Ensure local and continuous-integration workflows can run the required
-  checks.
-- Add a small representative test to verify that the workflow is connected.
+- Create the project structure and entry point described in the architecture
+  reference.
+- Add the initial declarations for `HackerNewsEntry`, `FilterType`,
+  `ParseResult<T>`, `ScrapeStats`, `UsageLog`, typed domain errors, and the
+  application result contract. These are contracts only; feature behavior is
+  delivered by later stories.
+- Expose a temporary `GET /hello` endpoint that returns a minimal Hello World
+  response.
+- Add the `/hello` operation to the canonical OpenAPI document before
+  implementing the route, and generate the human-readable API reference.
+- Add automated tests for the endpoint and set up the required quality-check
+  commands described by the QA approach.
+- Implement the pre-commit hook and GitHub Actions CI/release workflows
+  described by the CI/CD model.
 
 **Acceptance criteria:**
 
-1. **Given** the project dependencies are installed, **when** the documented
-   test command is run, **then** the configured automated test suite executes
-   and reports its result with the appropriate process exit status.
-2. **Given** a deliberately failing test, **when** the relevant test command
-   is run, **then** the failure is reported and the command exits
-   unsuccessfully.
-3. **Given** the test workflow requirements in the QA approach, **when** the
-   project checks are configured, **then** required checks and opt-in checks
-   are separated as specified there.
-4. **Given** the configured project checks, **when** a developer follows the
-   QA approach, **then** each required check can be run using its documented
-   command.
+#### Automated checks
 
----
+1. **Given** the service is running, **when** a client calls `GET /hello`,
+   **then** it receives HTTP 200 with `application/json` and the body
+   `{"message":"Hello, world!"}`.
+2. **Given** the `/hello` operation is implemented, **when** its HTTP
+   integration and deterministic acceptance tests run, **then** they pass and
+   verify the documented response.
+3. **Given** a commit is attempted and the unit-test command fails,
+   **when** the pre-commit hook runs, **then** the commit is blocked.
+4. **Given** a commit is attempted and the unit-test command passes,
+   **when** the pre-commit hook runs, **then** it succeeds.
+5. **Given** a pull request containing this story is checked, **when** the CI
+   pipeline completes, **then** all required checks defined by the QA approach
+   pass, including the applicable tests, contract checks, and build.
 
-### US-03: Define the story and request data contracts
+#### Manual review
 
-**As a** developer, **I want** the product's story, filter, statistics, usage,
-and error information represented consistently **so that** features can
-exchange the correct data.
-
-**Planned work:**
-
-- Represent the story fields and two canonical filter identifiers defined in
-  the product contract.
-- Represent parsing statistics and usage information needed by later stories.
-- Provide stable error identifiers and useful messages for product failures.
-- Follow the domain boundaries defined in the architecture reference.
-
-**Acceptance criteria:**
-
-1. **Given** a story value, **when** it is represented by the application,
-   **then** it contains a number, title, points, and comment count.
-2. **Given** a filter identifier, **when** it is accepted as a supported
-   product value, **then** it is one of the two canonical identifiers in this
-   backlog.
-3. **Given** parsing completes, **when** its statistics are returned,
-   **then** they distinguish rows found, entries parsed, and parse errors.
-4. **Given** a product-level failure, **when** it is reported, **then** it
-   provides a stable error code and a useful message.
+6. Confirm the contracts listed in Planned work and the folder structure
+   match the architecture reference, and contain no scraping, filtering, or
+   persistence implementation.
+7. Confirm the OpenAPI contract and its generated reference describe the
+   `GET /hello` response used by the endpoint.
+8. Confirm the release workflow follows the CI/CD model: a version tag is
+   required, failed gates prevent publication, and the verified build artifact
+   is what would be attached to a GitHub Release. No actual release needs to
+   be published to accept this story.
 
 ---
 
 ## Phase 2 — Retrieve and filter stories
 
-### US-04: Retrieve the Hacker News homepage
+### US-02: Retrieve the Hacker News homepage
 
 **As a** user, **I want** the service to retrieve the Hacker News page
 reliably **so that** my filter request can use current story data.
@@ -250,7 +219,7 @@ reliably **so that** my filter request can use current story data.
 
 ---
 
-### US-05: Extract the first 30 story entries
+### US-03: Extract the first 30 story entries
 
 **As a** user, **I want** the first 30 Hacker News stories returned as
 structured data **so that** filtering does not depend on raw HTML.
@@ -292,7 +261,7 @@ structured data **so that** filtering does not depend on raw HTML.
 
 ---
 
-### US-06: Count words in story titles
+### US-04: Count words in story titles
 
 **As a** user, **I want** title word counts to follow one consistent rule
 **so that** stories are assigned to the intended filter.
@@ -322,7 +291,7 @@ structured data **so that** filtering does not depend on raw HTML.
 
 ---
 
-### US-07: Make supported filter options available
+### US-05: Make supported filter options available
 
 **As a** user, **I want** requests to be matched to one of the supported
 filter options **so that** each request applies a known product rule.
@@ -350,7 +319,7 @@ filter options **so that** each request applies a known product rule.
 
 ---
 
-### US-08: Apply the two story filters
+### US-06: Apply the two story filters
 
 **As a** user, **I want** stories filtered and ordered according to my
 selected option **so that** I can find long titles with discussion or short
@@ -392,7 +361,7 @@ titles with high points.
 
 ## Phase 3 — Usage records and request processing
 
-### US-09: Initialize durable usage storage
+### US-07: Initialize durable usage storage
 
 **As a** system operator, **I want** usage storage to be initialized
 reliably **so that** requests can be recorded without manual database setup.
@@ -419,7 +388,7 @@ reliably **so that** requests can be recorded without manual database setup.
 
 ---
 
-### US-10: Record and retrieve usage information
+### US-08: Record and retrieve usage information
 
 **As a** system operator, **I want** completed and failed requests recorded
 with useful context **so that** I can inspect usage and crawler behavior.
@@ -453,7 +422,7 @@ with useful context **so that** I can inspect usage and crawler behavior.
 
 ---
 
-### US-11: Process a filter request
+### US-09: Process a filter request
 
 **As a** user, **I want** a filter request to run as one coherent operation
 **so that** I receive results and accurate usage information.
@@ -488,16 +457,17 @@ with useful context **so that** I can inspect usage and crawler behavior.
 
 ## Phase 4 — REST delivery and project handoff
 
-### US-12: Expose filter requests through REST
+### US-10: Expose filter requests through REST
 
 **As a** user, **I want** to request a filter over HTTP **so that** I can
 retrieve matching Hacker News entries from a client.
 
 **Planned work:**
 
-- Expose filter requests over HTTP as specified by the OpenAPI contract.
-- Deliver the OpenAPI contract for the endpoint and implement the behavior
-  described by that contract.
+- Implement the product filtering endpoint described by the canonical OpenAPI
+  contract. If its public behavior needs to change, update the contract first.
+- Retire the temporary `GET /hello` scaffold endpoint when the product
+  endpoint is ready.
 - Use the HTTP adapter boundaries in the architecture reference.
 
 **Acceptance criteria:**
@@ -518,10 +488,13 @@ retrieve matching Hacker News entries from a client.
    OpenAPI contract and does not retrieve the Hacker News page.
 6. **Given** a request includes a User-Agent header, **when** its usage event
    is recorded, **then** that value is included when available.
+7. **Given** the product filtering endpoint is delivered, **when** the public
+   API is inspected, **then** the temporary scaffold-only `GET /hello` route
+   is no longer exposed.
 
 ---
 
-### US-13: Communicate request failures safely
+### US-11: Communicate request failures safely
 
 **As a** user, **I want** understandable and safe failure responses **so
 that** I know when a request could not be completed without receiving
@@ -559,7 +532,7 @@ internal diagnostics.
 
 ---
 
-### US-14: Document and prepare the project for handoff
+### US-12: Document and prepare the project for handoff
 
 **As a** project reviewer, **I want** clear usage and delivery
 documentation **so that** I can install, run, and evaluate the service
@@ -603,21 +576,20 @@ independently.
 ### Planned dependency order
 
 ```text
-US-01 Foundation → US-02 Verification workflow → US-03 Data contracts
-US-03 → US-04 Retrieval, US-05 Parsing, US-06 Word counting
-US-05 + US-06 → US-07 Filter options → US-08 Filter behavior
-US-03 → US-09 Usage storage → US-10 Usage records
-US-04 + US-05 + US-07 + US-08 + US-09 + US-10 → US-11 Request processing
-US-11 → US-12 REST delivery → US-13 Failure responses → US-14 Handoff
+US-01 scaffold → US-02 Retrieval, US-03 Parsing, US-04 Word counting (parallel)
+US-01 + US-04 → US-05 Filter options → US-06 Filter behavior
+US-01 → US-07 Usage storage → US-08 Usage records
+US-02 + US-03 + US-04 + US-05 + US-06 + US-07 + US-08 → US-09 Request processing
+US-09 → US-10 REST delivery → US-11 Failure responses → US-12 Handoff
 ```
 
 ### Milestones
 
-- **Milestone 1 — Foundation and story behavior (US-01 to US-08):** runnable
-  project, retrieval and parsing behavior, word counting, and both filters.
-- **Milestone 2 — Usage and request processing (US-09 to US-11):** durable
+- **Milestone 1 — Foundation and story behavior (US-01 to US-06):** runnable
+  scaffold, retrieval and parsing behavior, word counting, and both filters.
+- **Milestone 2 — Usage and request processing (US-07 to US-09):** durable
   usage records and a complete filter-request operation.
-- **Milestone 3 — Delivery and handoff (US-12 to US-14):** REST behavior,
+- **Milestone 3 — Delivery and handoff (US-10 to US-12):** REST behavior,
   safe failure responses, and reviewer-ready documentation.
 
 ### Backlog-wide references
