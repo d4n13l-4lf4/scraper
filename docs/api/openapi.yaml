@@ -4,9 +4,31 @@ info:
   title: Hacker News Crawler API
   version: 1.0.0
   description: HTTP contract for requesting Hacker News story filters.
+  license:
+    name: MIT
 servers:
   - url: /
+security: []
 paths:
+  /hello:
+    get:
+      operationId: getHello
+      summary: Temporary Hello World scaffold endpoint
+      description: Returns a minimal Hello World response. Temporary endpoint, retired when the product filtering endpoint is delivered.
+      responses:
+        '200':
+          description: Hello World response.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - message
+                properties:
+                  message:
+                    type: string
+                    example: 'Hello, world!'
   /entries:
     get:
       operationId: getEntries

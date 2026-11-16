@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify tag points to commit on main
+        run: |
+          TAGGED_COMMIT=$(git rev-list -n 1 "${{ github.ref }}")
+          MAIN_COMMIT=$(git rev-parse main)
+          IS_ANCESTOR=$(git merge-base --is-ancestor "$TAGGED_COMMIT" "$MAIN_COMMIT" && echo "true" || echo "false")
+          if [ "$IS_ANCESTOR" != "true" ]; then
+            echo "::error::Tagged commit $TAGGED_COMMIT is not reachable from main. Aborting release."
+            exit 1
+          fi
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Package release artifact
+        run: |
+          TAG="${{ github.ref_name }}"
+          tar -czf "hacker-news-crawler-${TAG}.tar.gz" dist/ package.json package-lock.json
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: '${{ github.ref_name }}'
+          generate_release_notes: true
+          files: 'hacker-news-crawler-${{ github.ref_name }}.tar.gz'

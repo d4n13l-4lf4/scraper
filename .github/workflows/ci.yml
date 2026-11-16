@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, release/**]
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run strict type checking
+        run: npm run typecheck
+
+      - name: Run architecture checks
+        run: npm run test:architecture
+
+      - name: Validate OpenAPI contract
+        run: npm run api:validate
+
+      - name: Generate API reference
+        run: npm run api:docs
+
+      - name: Run unit tests with coverage
+        run: npm run test:unit:coverage
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Run acceptance tests
+        run: npm run test:acceptance
+
+      - name: Build production application
+        run: npm run build

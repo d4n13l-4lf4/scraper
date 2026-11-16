@@ -8,7 +8,7 @@ When counting words, consider only the spaced words and exclude any symbols. For
 
 The solution should store usage data, including at least the request timestamp and a field to identify the applied filter. You are free to include any additional fields you deem relevant to track user interaction and crawler behavior. The chosen storage mechanism could be a database, cache, or any other suitable tool.
 
-To gain insight into your thought process, please consider including brief documentation explaining the key design decisions you made. This can be formatted in any way you find comfortable, such as an explanatory text file, markdown document, or comments within the code. 
+To gain insight into your thought process, please consider including brief documentation explaining the key design decisions you made. This can be formatted in any way you find comfortable, such as an explanatory text file, markdown document, or comments within the code.
 
 We will measure the performance of the provided solution and your ability to test the requested operations in the scenarios described above. In addition, we'd love to see the following in your code for extra points:
 
